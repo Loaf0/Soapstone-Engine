@@ -1,23 +1,31 @@
 package live.soapstone.main;
 
+import live.soapstone.core.EngineManager;
 import live.soapstone.core.WindowManager;
+import live.soapstone.core.utils.Consts;
 import org.lwjgl.Version;
 
 import java.awt.*;
 
 public class Launcher {
+
+    private static WindowManager window;
+    private static EngineManager engine;
+
+
     public static void main(String[] args) {
-        System.out.print(Version.getVersion());
+        window = new WindowManager(Consts.TITLE, 640, 480, false);
+        engine = new EngineManager();
 
-        WindowManager window = new WindowManager("Soapstone Engine", 640, 480, false);
-        window.init();
-
-        while(!window.windowShouldClose()) {
-            window.update();
+        try {
+            engine.start();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        window.cleanup();
     }
 
+    public static WindowManager getWindow(){
+        return window;
+    }
 
 }
