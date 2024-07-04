@@ -4,8 +4,10 @@ import live.soapstone.core.ILogic;
 import live.soapstone.core.ObjectLoader;
 import live.soapstone.core.RenderManager;
 import live.soapstone.core.WindowManager;
+import live.soapstone.core.entity.Entity;
 import live.soapstone.core.entity.Model;
 import live.soapstone.core.entity.Texture;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
@@ -18,7 +20,7 @@ public class TestGame implements ILogic {
     private final ObjectLoader loader;
     private final WindowManager window;
 
-    private Model model;
+    private Entity entity;
 
     public TestGame() {
         renderer = new RenderManager();
@@ -49,8 +51,10 @@ public class TestGame implements ILogic {
                 1, 0
         };
 
-        model = loader.loadModel(vertices, textureCoords, indices);
+        Model model = loader.loadModel(vertices, textureCoords, indices);
         model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")));
+
+        entity = new Entity(model, new Vector3f(1,0,0), new Vector3f(0,0,0), 1);
     }
 
     @Override
@@ -75,6 +79,11 @@ public class TestGame implements ILogic {
         else if (color <= 0){
             color = 0.0f;
         }
+
+        if (entity.getPos().x < -1.5f){
+            entity.getPos().x = 1.5f;
+        }
+        entity.getPos().x -= 0.01f;
     }
 
     @Override
@@ -85,7 +94,7 @@ public class TestGame implements ILogic {
         }
 
         window.setClearColor(color, color, color, 0.0f);
-        renderer.render(model);
+        renderer.render(entity);
     }
 
     @Override
