@@ -8,11 +8,9 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 
-public class WindowManager {
+import static live.soapstone.core.utils.Consts.*;
 
-    public static final float FOV = (float) Math.toRadians(60);
-    public static final float Z_NEAR = 0.01f;
-    public static final float Z_FAR = 1000f;
+public class WindowManager {
 
     private String title;
 
@@ -137,7 +135,7 @@ public class WindowManager {
         return width;
     }
 
-    public long getWindow() {
+    public long getWindowHandle() {
         return window;
     }
 

@@ -4,13 +4,14 @@ import live.soapstone.core.*;
 import live.soapstone.core.entity.Entity;
 import live.soapstone.core.entity.Model;
 import live.soapstone.core.entity.Texture;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
-public class TestGame implements ILogic {
+import static live.soapstone.core.utils.Consts.*;
 
-    private static final float CAMERA_MOVE_SPEED = 0.05f;
+public class TestGame implements ILogic {
 
     private final RenderManager renderer;
     private final ObjectLoader loader;
@@ -56,7 +57,7 @@ public class TestGame implements ILogic {
                 0.5f, -0.5f, 0.5f,
         };
 
-        float[] textCoords = new float[]{
+        float[] textCords = new float[]{
                 0.0f, 0.0f,
                 0.0f, 0.5f,
                 0.5f, 0.5f,
@@ -88,7 +89,7 @@ public class TestGame implements ILogic {
                 4, 6, 7, 5, 4, 7,
         };
 
-        Model model = loader.loadModel(vertices, textCoords, indices);
+        Model model = loader.loadModel(vertices, textCords, indices);
         model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")));
 
         entity = new Entity(model, new Vector3f(0,0,-5), new Vector3f(0,0,0), 1);
@@ -96,33 +97,39 @@ public class TestGame implements ILogic {
 
     @Override
     public void input() {
-        cameraInc.set(0,0,0);
-        if (window.isKeyPressed(GLFW.GLFW_KEY_W)){
+        // Reset cameraInc vector
+        cameraInc.set(0, 0, 0);
+
+        // Update cameraInc based on key inputs
+        if (window.isKeyPressed(GLFW.GLFW_KEY_W)) {
             cameraInc.z = -1;
         }
-        if (window.isKeyPressed(GLFW.GLFW_KEY_S)){
+        if (window.isKeyPressed(GLFW.GLFW_KEY_S)) {
             cameraInc.z = 1;
         }
-
-        if (window.isKeyPressed(GLFW.GLFW_KEY_A)){
+        if (window.isKeyPressed(GLFW.GLFW_KEY_A)) {
             cameraInc.x = -1;
         }
-        if (window.isKeyPressed(GLFW.GLFW_KEY_D)){
+        if (window.isKeyPressed(GLFW.GLFW_KEY_D)) {
             cameraInc.x = 1;
         }
-
-        if (window.isKeyPressed(GLFW.GLFW_KEY_Q)){
+        if (window.isKeyPressed(GLFW.GLFW_KEY_Z)) {
             cameraInc.y = -1;
         }
-        if (window.isKeyPressed(GLFW.GLFW_KEY_E)){
+        if (window.isKeyPressed(GLFW.GLFW_KEY_X)) {
             cameraInc.y = 1;
         }
-
     }
 
+
     @Override
-    public void update() {
-        camera.movePosition(cameraInc.x * CAMERA_MOVE_SPEED, cameraInc.y * CAMERA_MOVE_SPEED, cameraInc.z * CAMERA_MOVE_SPEED);
+    public void update(float interval, MouseInput mouseInput) {
+        camera.movePosition(cameraInc.x * CAMERA_STEP, cameraInc.y * CAMERA_STEP, cameraInc.z * CAMERA_STEP);
+
+        if(mouseInput.isRightButtonPress()) {
+            Vector2f rotVec = mouseInput.getDisplVec();
+            camera.moveRotation(rotVec.x * MOUSE_SENSITIVITY, rotVec.y * MOUSE_SENSITIVITY, 0);
+        }
 
         entity.incRotation(0.0f, 0.5f,0.0f);
 

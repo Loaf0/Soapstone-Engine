@@ -1,7 +1,6 @@
 package live.soapstone.core;
 
 import live.soapstone.core.entity.Entity;
-import live.soapstone.core.entity.Model;
 import live.soapstone.core.utils.Transformation;
 import live.soapstone.core.utils.Utils;
 import live.soapstone.main.Launcher;
