@@ -35,7 +35,7 @@ public class TestGame implements ILogic {
         renderer.init();
 
         Model model = loader.loadOBJModel("/models/monkey.obj");
-        model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")));
+        model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
 
         entity = new Entity(model, new Vector3f(0,0,-5), new Vector3f(0,0,0), 1);
     }
@@ -76,7 +76,7 @@ public class TestGame implements ILogic {
             camera.moveRotation(rotVec.x * MOUSE_SENSITIVITY, rotVec.y * MOUSE_SENSITIVITY, 0);
         }
 
-        entity.incRotation(0.0f, 0.5f,0.0f);
+        entity.incRotation(0.0f, 0.25f,0.0f);
 
     }
 
@@ -87,7 +87,6 @@ public class TestGame implements ILogic {
             window.setResize(true);
         }
 
-        window.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         renderer.render(entity, camera);
     }
 
