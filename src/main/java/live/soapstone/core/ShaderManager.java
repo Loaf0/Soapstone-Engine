@@ -2,6 +2,7 @@ package live.soapstone.core;
 
 import live.soapstone.core.entity.Material;
 import live.soapstone.core.lighting.DirectionalLight;
+import live.soapstone.core.lighting.PointLight;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -49,6 +50,15 @@ public class ShaderManager {
         createUniform(uniformName + ".reflectance");
     }
 
+    public void createPointLightUniform(String uniformName) throws Exception {
+        createUniform(uniformName + ".color");
+        createUniform(uniformName + ".position");
+        createUniform(uniformName + ".intensity");
+        createUniform(uniformName + ".constant");
+        createUniform(uniformName + ".linear");
+        createUniform(uniformName + ".exponent");
+    }
+
     public void setUniform(String uniformName, boolean value){
         float res = 0;
         if(value){
@@ -92,6 +102,15 @@ public class ShaderManager {
         setUniform(uniformName + ".color", directionalLight.getColor());
         setUniform(uniformName + ".direction", directionalLight.getDirection());
         setUniform(uniformName + ".intensity", directionalLight.getIntensity());
+    }
+
+    public void setUniform(String uniformName, PointLight pointLight){
+        setUniform(uniformName + ".color", pointLight.getColor());
+        setUniform(uniformName + ".position", pointLight.getPosition());
+        setUniform(uniformName + ".intensity", pointLight.getIntensity());
+        setUniform(uniformName + ".constant", pointLight.getConstant());
+        setUniform(uniformName + ".linear", pointLight.getLinear());
+        setUniform(uniformName + ".exponent", pointLight.getExponent());
     }
 
     public void setUniform(String uniformName, Material material) {

@@ -5,6 +5,7 @@ import live.soapstone.core.entity.Entity;
 import live.soapstone.core.entity.Model;
 import live.soapstone.core.entity.Texture;
 import live.soapstone.core.lighting.DirectionalLight;
+import live.soapstone.core.lighting.PointLight;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
@@ -25,6 +26,7 @@ public class TestGame implements ILogic {
 
     private float lightAngle;
     private DirectionalLight directionalLight;
+    private PointLight pointLight;
 
 
     public TestGame() {
@@ -42,12 +44,16 @@ public class TestGame implements ILogic {
 
         Model model = loader.loadOBJModel("/models/monkey.obj");
         model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
-
         entity = new Entity(model, new Vector3f(0,0,-5), new Vector3f(0,0,0), 1);
-        float lightIntesity = 0.0f;
-        Vector3f lightPosition = new Vector3f(-1, -10, 0);
+
+        float lightIntensity = 2.0f;
+        Vector3f lightPosition = new Vector3f(0, 0, -3.2f);
         Vector3f lightColor = new Vector3f(1, 1, 1);
-        directionalLight = new DirectionalLight(lightColor, lightPosition, lightIntesity);
+        pointLight = new PointLight(lightColor, lightPosition, lightIntensity, 1, 1, 1);
+
+        lightPosition = new Vector3f(-1, -10, 0);
+        lightColor = new Vector3f(1, 1, 1);
+        directionalLight = new DirectionalLight(lightColor, lightPosition, lightIntensity);
     }
 
     @Override
@@ -62,17 +68,30 @@ public class TestGame implements ILogic {
         if (window.isKeyPressed(GLFW.GLFW_KEY_S)) {
             cameraInc.z = 1;
         }
+
         if (window.isKeyPressed(GLFW.GLFW_KEY_A)) {
             cameraInc.x = -1;
         }
         if (window.isKeyPressed(GLFW.GLFW_KEY_D)) {
             cameraInc.x = 1;
         }
+
         if (window.isKeyPressed(GLFW.GLFW_KEY_Q)) {
             cameraInc.y = -1;
         }
         if (window.isKeyPressed(GLFW.GLFW_KEY_E)) {
             cameraInc.y = 1;
+        }
+
+        final float LIGHT_STEP = 0.0001f; // really small step because we don't have delta time yet
+
+        if (window.isKeyPressed(GLFW.GLFW_KEY_O)) {
+            pointLight.getPosition().x += LIGHT_STEP;
+            System.out.println("PointLight pos: " + pointLight.getPosition());
+        }
+        if (window.isKeyPressed(GLFW.GLFW_KEY_P)) {
+            pointLight.getPosition().x -= LIGHT_STEP;
+            System.out.println("PointLight pos: " + pointLight.getPosition());
         }
     }
 
@@ -86,7 +105,7 @@ public class TestGame implements ILogic {
             camera.moveRotation(rotVec.x * MOUSE_SENSITIVITY, rotVec.y * MOUSE_SENSITIVITY, 0);
         }
 
-        //entity.incRotation(0.0f, 0.25f,0.0f);
+        entity.incRotation(0.0f, 0.25f,0.0f);
         lightAngle += 0.5f;
         if (lightAngle > 90) {
             directionalLight.setIntensity(0);
@@ -115,7 +134,7 @@ public class TestGame implements ILogic {
             window.setResize(true);
         }
 
-        renderer.render(entity, camera, directionalLight);
+        renderer.render(entity, camera, directionalLight, pointLight);
     }
 
     @Override

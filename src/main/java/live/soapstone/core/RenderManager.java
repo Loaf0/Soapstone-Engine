@@ -2,6 +2,7 @@ package live.soapstone.core;
 
 import live.soapstone.core.entity.Entity;
 import live.soapstone.core.lighting.DirectionalLight;
+import live.soapstone.core.lighting.PointLight;
 import live.soapstone.core.utils.Consts;
 import live.soapstone.core.utils.Transformation;
 import live.soapstone.core.utils.Utils;
@@ -33,10 +34,10 @@ public class RenderManager {
         shader.createMaterialUniform("material");
         shader.createUniform("specularPower");
         shader.createDirectionalLightUniform("directionalLight");
-
+        shader.createPointLightUniform("pointLight");
     }
 
-    public void render(Entity entity, Camera camera, DirectionalLight directionalLight) {
+    public void render(Entity entity, Camera camera, DirectionalLight directionalLight, PointLight pointLight) {
         clear();
 
         shader.bind();
@@ -49,6 +50,7 @@ public class RenderManager {
         shader.setUniform("ambientLight", Consts.AMBIENT_LIGHT);
         shader.setUniform("specularPower", Consts.SPECULAR_POWER);
         shader.setUniform("directionalLight", directionalLight);
+        shader.setUniform("pointLight", pointLight);
 
         GL30.glBindVertexArray(entity.getModel().getId());
         GL20.glEnableVertexAttribArray(0);
