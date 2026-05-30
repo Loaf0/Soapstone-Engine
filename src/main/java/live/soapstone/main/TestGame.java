@@ -6,6 +6,7 @@ import live.soapstone.core.entity.Model;
 import live.soapstone.core.entity.Texture;
 import live.soapstone.core.lighting.DirectionalLight;
 import live.soapstone.core.lighting.PointLight;
+import live.soapstone.core.lighting.SpotLight;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
@@ -27,6 +28,7 @@ public class TestGame implements ILogic {
     private float lightAngle;
     private DirectionalLight directionalLight;
     private PointLight pointLight;
+    private SpotLight spotLight;
 
 
     public TestGame() {
@@ -46,11 +48,19 @@ public class TestGame implements ILogic {
         model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
         entity = new Entity(model, new Vector3f(0,0,-5), new Vector3f(0,0,0), 1);
 
+        //Point Light
         float lightIntensity = 2.0f;
         Vector3f lightPosition = new Vector3f(0, 0, -3.2f);
         Vector3f lightColor = new Vector3f(1, 1, 1);
         pointLight = new PointLight(lightColor, lightPosition, lightIntensity, 1, 1, 1);
 
+
+        //Spot Light
+        Vector3f coneDirection = new Vector3f(0, 0, 1);
+        float cutoff = (float) Math.cos(Math.toRadians(180));
+        spotLight = new SpotLight(new PointLight(lightColor, new Vector3f(0,0,1f), lightIntensity, 0, 0, 1), coneDirection, cutoff);
+
+        //Directional Light
         lightPosition = new Vector3f(-1, -10, 0);
         lightColor = new Vector3f(1, 1, 1);
         directionalLight = new DirectionalLight(lightColor, lightPosition, lightIntensity);
@@ -87,17 +97,25 @@ public class TestGame implements ILogic {
 
         if (window.isKeyPressed(GLFW.GLFW_KEY_O)) {
             pointLight.getPosition().x += LIGHT_STEP;
-            System.out.println("PointLight pos: " + pointLight.getPosition());
+//            System.out.println("PointLight pos: " + pointLight.getPosition());
         }
         if (window.isKeyPressed(GLFW.GLFW_KEY_P)) {
             pointLight.getPosition().x -= LIGHT_STEP;
-            System.out.println("PointLight pos: " + pointLight.getPosition());
+//            System.out.println("PointLight pos: " + pointLight.getPosition());
         }
+
+        float lightPos = spotLight.getPointLight().getPosition().z;
+        if(window.isKeyPressed(GLFW.GLFW_KEY_N))
+            spotLight.getPointLight().getPosition().z = lightPos + 0.1f;
+        if(window.isKeyPressed(GLFW.GLFW_KEY_M))
+            spotLight.getPointLight().getPosition().z = lightPos - 0.1f;
     }
+
 
 
     @Override
     public void update(float interval, MouseInput mouseInput) {
+//        float cameraSpeed = CAMERA_STEP * interval;
         camera.movePosition(cameraInc.x * CAMERA_STEP, cameraInc.y * CAMERA_STEP, cameraInc.z * CAMERA_STEP);
 
         if(mouseInput.isRightButtonPress()) {
@@ -134,7 +152,7 @@ public class TestGame implements ILogic {
             window.setResize(true);
         }
 
-        renderer.render(entity, camera, directionalLight, pointLight);
+        renderer.render(entity, camera, directionalLight, pointLight, spotLight);
     }
 
     @Override

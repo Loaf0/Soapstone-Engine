@@ -3,6 +3,7 @@ package live.soapstone.core;
 import live.soapstone.core.entity.Material;
 import live.soapstone.core.lighting.DirectionalLight;
 import live.soapstone.core.lighting.PointLight;
+import live.soapstone.core.lighting.SpotLight;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -59,6 +60,12 @@ public class ShaderManager {
         createUniform(uniformName + ".exponent");
     }
 
+    public void createSpotLightUniform(String uniformName) throws Exception {
+        createPointLightUniform(uniformName + ".pl");
+        createUniform(uniformName + ".conedir");
+        createUniform(uniformName + ".cutoff");
+    }
+
     public void setUniform(String uniformName, boolean value){
         float res = 0;
         if(value){
@@ -111,6 +118,12 @@ public class ShaderManager {
         setUniform(uniformName + ".constant", pointLight.getConstant());
         setUniform(uniformName + ".linear", pointLight.getLinear());
         setUniform(uniformName + ".exponent", pointLight.getExponent());
+    }
+
+    public void setUniform(String uniformName, SpotLight spotLight){
+        setUniform(uniformName + ".pl", spotLight.getPointLight());
+        setUniform(uniformName + ".conedir", spotLight.getConeDirection());
+        setUniform(uniformName + ".cutoff", spotLight.getCutoff());
     }
 
     public void setUniform(String uniformName, Material material) {
