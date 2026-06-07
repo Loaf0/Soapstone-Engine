@@ -27,8 +27,8 @@ public class TestGame implements ILogic {
 
     private float lightAngle;
     private DirectionalLight directionalLight;
-    private PointLight pointLight;
-    private SpotLight spotLight;
+    private PointLight[] pointLights;
+    private SpotLight[] spotLights;
 
 
     public TestGame() {
@@ -50,20 +50,27 @@ public class TestGame implements ILogic {
 
         //Point Light
         float lightIntensity = 2.0f;
-        Vector3f lightPosition = new Vector3f(0, 0, -3.2f);
+        Vector3f lightPosition = new Vector3f(-0.5f, -0.5f, -3.2f);
         Vector3f lightColor = new Vector3f(1, 1, 1);
-        pointLight = new PointLight(lightColor, lightPosition, lightIntensity, 1, 1, 1);
+        PointLight pointLight = new PointLight(lightColor, lightPosition, lightIntensity, 1, 1, 1);
 
 
         //Spot Light
         Vector3f coneDirection = new Vector3f(0, 0, 1);
         float cutoff = (float) Math.cos(Math.toRadians(180));
-        spotLight = new SpotLight(new PointLight(lightColor, new Vector3f(0,0,1f), lightIntensity, 0, 0, 1), coneDirection, cutoff);
+        SpotLight spotLight = new SpotLight(new PointLight(lightColor, new Vector3f(0,0,1f), lightIntensity, 0, 0, 1), coneDirection, cutoff);
+
+        //Spot Light2
+        SpotLight spotLight2 = new SpotLight(new PointLight(lightColor, new Vector3f(0,0,1f), lightIntensity, 0, 0, 1), coneDirection, cutoff);
+
 
         //Directional Light
         lightPosition = new Vector3f(-1, -10, 0);
         lightColor = new Vector3f(1, 1, 1);
         directionalLight = new DirectionalLight(lightColor, lightPosition, lightIntensity);
+
+        pointLights = new PointLight[]{pointLight};
+        spotLights = new SpotLight[]{spotLight, spotLight2};
     }
 
     @Override
@@ -93,22 +100,22 @@ public class TestGame implements ILogic {
             cameraInc.y = 1;
         }
 
-        final float LIGHT_STEP = 0.0001f; // really small step because we don't have delta time yet
+        final float LIGHT_STEP = 0.0001f; // really small step because we don't have delta time in the input method, so we don't want the light to move too fast
 
         if (window.isKeyPressed(GLFW.GLFW_KEY_O)) {
-            pointLight.getPosition().x += LIGHT_STEP;
+            pointLights[0].getPosition().x += LIGHT_STEP;
 //            System.out.println("PointLight pos: " + pointLight.getPosition());
         }
         if (window.isKeyPressed(GLFW.GLFW_KEY_P)) {
-            pointLight.getPosition().x -= LIGHT_STEP;
+            pointLights[0].getPosition().x -= LIGHT_STEP;
 //            System.out.println("PointLight pos: " + pointLight.getPosition());
         }
 
-        float lightPos = spotLight.getPointLight().getPosition().z;
+        float lightPos = spotLights[0].getPointLight().getPosition().z;
         if(window.isKeyPressed(GLFW.GLFW_KEY_N))
-            spotLight.getPointLight().getPosition().z = lightPos + 0.1f;
+            spotLights[0].getPointLight().getPosition().z = lightPos + 0.1f;
         if(window.isKeyPressed(GLFW.GLFW_KEY_M))
-            spotLight.getPointLight().getPosition().z = lightPos - 0.1f;
+            spotLights[0].getPointLight().getPosition().z = lightPos - 0.1f;
     }
 
 
@@ -152,7 +159,7 @@ public class TestGame implements ILogic {
             window.setResize(true);
         }
 
-        renderer.render(entity, camera, directionalLight, pointLight, spotLight);
+        renderer.render(entity, camera, directionalLight, pointLights, spotLights);
     }
 
     @Override

@@ -19,4 +19,6 @@ public class Consts {
 
     public static final Vector3f AMBIENT_LIGHT = new Vector3f(0.3f, 0.3f, 0.3f);
 
+    public static final int MAX_POINT_LIGHTS = 10;
+    public static final int MAX_SPOT_LIGHTS = 10;
 }

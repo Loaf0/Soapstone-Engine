@@ -66,6 +66,18 @@ public class ShaderManager {
         createUniform(uniformName + ".cutoff");
     }
 
+    public void createPointLightListUniform(String uniformName, int size) throws Exception {
+        for(int i = 0; i < size; i++){
+            createPointLightUniform(uniformName + "[" + i + "]");
+        }
+    }
+
+    public void createSpotLightListUniform(String uniformName, int size) throws Exception {
+        for(int i = 0; i < size; i++){
+            createSpotLightUniform(uniformName + "[" + i + "]");
+        }
+    }
+
     public void setUniform(String uniformName, boolean value){
         float res = 0;
         if(value){
@@ -132,6 +144,28 @@ public class ShaderManager {
         setUniform(uniformName + ".specular", material.getSpecularColor());
         setUniform(uniformName + ".hasTexture", material.hasTexture() ? 1 : 0);
         setUniform(uniformName + ".reflectance", material.getReflectance());
+    }
+
+    public void setUniform(String uniformName, PointLight[] pointLights) {
+        int numLights = pointLights != null ? pointLights.length : 0;
+        for(int i = 0; i < numLights; i++){
+            setUniform(uniformName, pointLights[i], i);
+        }
+    }
+
+    public void setUniform(String uniformName, PointLight pointLight, int index) {
+        setUniform(uniformName + "[" + index + "]", pointLight);
+    }
+
+    public void setUniforms(String uniformName, SpotLight[] spotLights) {
+        int numLights = spotLights != null ? spotLights.length : 0;
+        for(int i = 0; i < numLights; i++){
+            setUniform(uniformName, spotLights[i], i);
+        }
+    }
+
+    public void setUniform(String uniformName, SpotLight spotLight, int index) {
+        setUniform(uniformName + "[" + index + "]", spotLight);
     }
 
     public int createShader(String shaderCode, int shaderType) throws Exception {
