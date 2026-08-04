@@ -12,6 +12,10 @@ import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import static live.soapstone.core.utils.Consts.*;
 
 public class TestGame implements ILogic {
@@ -20,7 +24,7 @@ public class TestGame implements ILogic {
     private final ObjectLoader loader;
     private final WindowManager window;
 
-    private Entity entity;
+    private List<Entity> entities;
     private Camera camera;
 
     Vector3f cameraInc;
@@ -44,9 +48,18 @@ public class TestGame implements ILogic {
     public void init() throws Exception {
         renderer.init();
 
-        Model model = loader.loadOBJModel("/models/monkey.obj");
-        model.setTexture(new Texture(loader.loadTexture("textures/grassblock.png")), 1f);
-        entity = new Entity(model, new Vector3f(0,0,-5), new Vector3f(0,0,0), 1);
+        Model model = loader.loadOBJModel("/models/horse.obj");
+        model.setTexture(new Texture(loader.loadTexture("textures/horse.jpg")), 1f);
+
+        entities = new ArrayList<>();
+        Random rnd = new Random();
+        for(int i = 0; i < 10_000; i++){
+            float x = rnd.nextFloat() * 1000 - 500;
+            float y = rnd.nextFloat() * 1000 - 500;
+            float z = rnd.nextFloat() * -3000;
+            entities.add(new Entity(model, new Vector3f(x,y,z), new Vector3f(rnd.nextFloat()*180,rnd.nextFloat()*180,0), 0.001f));
+        }
+        entities.add(new Entity(model, new Vector3f(0,0,-2), new Vector3f(0,0,0), 0.01f));
 
         //Point Light
         float lightIntensity = 2.0f;
@@ -130,7 +143,7 @@ public class TestGame implements ILogic {
             camera.moveRotation(rotVec.x * MOUSE_SENSITIVITY, rotVec.y * MOUSE_SENSITIVITY, 0);
         }
 
-        entity.incRotation(0.0f, 0.25f,0.0f);
+//        entity.incRotation(0.0f, 0.25f,0.0f);
         lightAngle += 0.5f;
         if (lightAngle > 90) {
             directionalLight.setIntensity(0);
@@ -150,6 +163,10 @@ public class TestGame implements ILogic {
         double angleRad = Math.toRadians(lightAngle);
         directionalLight.getDirection().x = (float) Math.sin(angleRad);
         directionalLight.getDirection().y = (float) Math.cos(angleRad);
+
+        for(Entity entity : entities){
+            renderer.processEntity(entity);
+        }
     }
 
     @Override
@@ -159,7 +176,7 @@ public class TestGame implements ILogic {
             window.setResize(true);
         }
 
-        renderer.render(entity, camera, directionalLight, pointLights, spotLights);
+        renderer.render(camera, directionalLight, pointLights, spotLights);
     }
 
     @Override

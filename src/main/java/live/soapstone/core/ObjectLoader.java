@@ -16,7 +16,9 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 public class ObjectLoader {
@@ -34,7 +36,12 @@ public class ObjectLoader {
         List<Vector3i> faces = new ArrayList<>();
 
         for(String line : lines){
-            String[] tokens = line.split("\\s");
+            line = line.trim();
+            if (line.isEmpty() || line.startsWith("#")) {
+                continue;
+            }
+
+            String[] tokens = line.split("\\s+");
 
             switch (tokens[0]){
                 case "v":
@@ -65,57 +72,122 @@ public class ObjectLoader {
                     break;
                 case "f":
                     //faces
-                    processFace(tokens[1], faces);
-                    processFace(tokens[2], faces);
-                    processFace(tokens[3], faces);
+                    List<Vector3i> faceVertices = new ArrayList<>();
+                    for (int tokenIndex = 1; tokenIndex < tokens.length; tokenIndex++) {
+                        faceVertices.add(parseFaceVertex(tokens[tokenIndex]));
+                    }
+
+                    for (int vertexIndex = 1; vertexIndex < faceVertices.size() - 1; vertexIndex++) {
+                        faces.add(faceVertices.get(0));
+                        faces.add(faceVertices.get(vertexIndex));
+                        faces.add(faceVertices.get(vertexIndex + 1));
+                    }
                     break;
                 default:
                     break;
             }
         }
 
+        List<Float> verticesData = new ArrayList<>();
+        List<Float> texCoordData = new ArrayList<>();
+        List<Float> normalData = new ArrayList<>();
         List<Integer> indices = new ArrayList<>();
-        float[] verticesArr = new float[vertices.size() * 3];
-        int i = 0;
-        for(Vector3f pos : vertices) {
-            verticesArr[i * 3] = pos.x;
-            verticesArr[i * 3 + 1] = pos.y;
-            verticesArr[i * 3 + 2] = pos.z;
-            i++;
-        }
-
-        float[] texCoordArr = new float[vertices.size() * 2];
-        float[] normalArr = new float[vertices.size() * 3];
+        Map<VertexKey, Integer> uniqueVertices = new HashMap<>();
 
         for (Vector3i face : faces){
-            processVertex(face.x, face.y, face.z, textures, normals, indices, texCoordArr, normalArr);
+            processVertex(face.x, face.y, face.z, vertices, textures, normals, uniqueVertices, indices, verticesData, texCoordData, normalData);
         }
 
+        float[] verticesArr = toFloatArray(verticesData);
+        float[] texCoordArr = toFloatArray(texCoordData);
+        float[] normalArr = toFloatArray(normalData);
         int[] indicesArr = indices.stream().mapToInt((Integer v) -> v).toArray();
 
         return loadModel(verticesArr, texCoordArr, normalArr, indicesArr);
     }
 
-    private static void processVertex(int pos, int texCoord, int normal, List<Vector2f> texCoordList, List<Vector3f>
-            normalList, List<Integer> indicesList, float[] texCoordArr, float[] normalArr) {
+    private static void processVertex(int pos, int texCoord, int normal, List<Vector3f> vertexList,
+            List<Vector2f> texCoordList, List<Vector3f> normalList, Map<VertexKey, Integer> vertexMap,
+            List<Integer> indicesList, List<Float> verticesData, List<Float> texCoordData, List<Float> normalData) {
 
-        indicesList.add(pos);
+        VertexKey vertexKey = new VertexKey(pos, texCoord, normal);
+        Integer index = vertexMap.get(vertexKey);
+        if (index == null) {
+            index = vertexMap.size();
+            vertexMap.put(vertexKey, index);
 
-        if (texCoord >= 0) {
-            Vector2f texCoordVec = texCoordList.get(texCoord);
-            texCoordArr[pos * 2] = texCoordVec.x;
-            texCoordArr[pos * 2 + 1] = 1 - texCoordVec.y;
+            Vector3f positionVec = vertexList.get(pos);
+            verticesData.add(positionVec.x);
+            verticesData.add(positionVec.y);
+            verticesData.add(positionVec.z);
+
+            if (texCoord >= 0) {
+                Vector2f texCoordVec = texCoordList.get(texCoord);
+                texCoordData.add(texCoordVec.x);
+                texCoordData.add(1 - texCoordVec.y);
+            } else {
+                texCoordData.add(0f);
+                texCoordData.add(0f);
+            }
+
+            if (normal >= 0) {
+                Vector3f normalVec = normalList.get(normal);
+                normalData.add(normalVec.x);
+                normalData.add(normalVec.y);
+                normalData.add(normalVec.z);
+            } else {
+                normalData.add(0f);
+                normalData.add(0f);
+                normalData.add(0f);
+            }
         }
 
-        if (normal >= 0) {
-            Vector3f normalVec = normalList.get(normal);
-            normalArr[pos * 3] = normalVec.x;
-            normalArr[pos * 3 + 1] = normalVec.y;
-            normalArr[pos * 3 + 2] = normalVec.z;
+        indicesList.add(index);
+    }
+
+    private static float[] toFloatArray(List<Float> data) {
+        float[] result = new float[data.size()];
+        for (int i = 0; i < data.size(); i++) {
+            result[i] = data.get(i);
+        }
+        return result;
+    }
+
+    private static final class VertexKey {
+        private final int positionIndex;
+        private final int textureIndex;
+        private final int normalIndex;
+
+        private VertexKey(int positionIndex, int textureIndex, int normalIndex) {
+            this.positionIndex = positionIndex;
+            this.textureIndex = textureIndex;
+            this.normalIndex = normalIndex;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (!(other instanceof VertexKey)) {
+                return false;
+            }
+            VertexKey that = (VertexKey) other;
+            return positionIndex == that.positionIndex
+                    && textureIndex == that.textureIndex
+                    && normalIndex == that.normalIndex;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Integer.hashCode(positionIndex);
+            result = 31 * result + Integer.hashCode(textureIndex);
+            result = 31 * result + Integer.hashCode(normalIndex);
+            return result;
         }
     }
 
-    private static void processFace(String token, List<Vector3i> face) {
+    private static Vector3i parseFaceVertex(String token) {
         String[] lineToken = token.split("/");
         int length = lineToken.length;
         int pos = -1, coords = -1, normal = -1;
@@ -128,8 +200,7 @@ public class ObjectLoader {
                 normal = Integer.parseInt(lineToken[2]) - 1;
             }
         }
-        Vector3i facesVec = new Vector3i(pos, coords, normal);
-        face.add(facesVec);
+        return new Vector3i(pos, coords, normal);
     }
 
 
